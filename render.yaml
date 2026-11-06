@@ -9,7 +9,7 @@ services:
     startCommand: node server.js
     envVars:
       - key: MONGO_URI
-        value: mongodb+srv://harshvardhan:Harsh%40123@cluster0.1ummtqf.mongodb.net/campusconnect?retryWrites=true&w=majority
+        value: mongodb://harshvardhan:Harsh%40123@ac-hq3np4o-shard-00-00.1ummtqf.mongodb.net:27017,ac-hq3np4o-shard-00-01.1ummtqf.mongodb.net:27017,ac-hq3np4o-shard-00-02.1ummtqf.mongodb.net:27017/campusconnect?ssl=true&replicaSet=atlas-1ck0dq-shard-0&authSource=admin&retryWrites=true&w=majority
       - key: JWT_SECRET
         value: campusconnect_super_secret_jwt_key_2026
       - key: JWT_EXPIRE

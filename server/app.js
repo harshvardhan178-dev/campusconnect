@@ -49,16 +49,19 @@ if (process.env.NODE_ENV === 'development') {
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const mongoose = require('mongoose');
-const DEFAULT_MONGO_URI = 'mongodb+srv://harshvardhan:Harsh%40123@cluster0.1ummtqf.mongodb.net/campusconnect?retryWrites=true&w=majority';
+const DIRECT_ATLAS_URI =
+  'mongodb://harshvardhan:Harsh%40123@ac-hq3np4o-shard-00-00.1ummtqf.mongodb.net:27017,ac-hq3np4o-shard-00-01.1ummtqf.mongodb.net:27017,ac-hq3np4o-shard-00-02.1ummtqf.mongodb.net:27017/campusconnect?ssl=true&replicaSet=atlas-1ck0dq-shard-0&authSource=admin&retryWrites=true&w=majority';
 
-// Auto-reconnect middleware if Mongoose connection was dropped or started before Atlas IP whitelist
+// Auto-reconnect middleware
 app.use(async (req, res, next) => {
   if (mongoose.connection.readyState === 0) {
     try {
-      const uri = process.env.MONGO_URI || DEFAULT_MONGO_URI;
-      await mongoose.connect(uri, { serverSelectionTimeoutMS: 10000 });
+      const uri = process.env.MONGO_URI || DIRECT_ATLAS_URI;
+      await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
     } catch (e) {
-      // Handled in specific routes
+      try {
+        await mongoose.connect(DIRECT_ATLAS_URI, { serverSelectionTimeoutMS: 5000 });
+      } catch (err) {}
     }
   }
   next();
@@ -68,9 +71,13 @@ app.use(async (req, res, next) => {
 app.get('/api/health', async (req, res) => {
   if (mongoose.connection.readyState === 0) {
     try {
-      const uri = process.env.MONGO_URI || DEFAULT_MONGO_URI;
-      await mongoose.connect(uri, { serverSelectionTimeoutMS: 10000 });
-    } catch (e) {}
+      const uri = process.env.MONGO_URI || DIRECT_ATLAS_URI;
+      await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
+    } catch (e) {
+      try {
+        await mongoose.connect(DIRECT_ATLAS_URI, { serverSelectionTimeoutMS: 5000 });
+      } catch (err) {}
+    }
   }
   const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
   res.status(200).json({

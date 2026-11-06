@@ -48,14 +48,33 @@ if (process.env.NODE_ENV === 'development') {
 // Serve uploaded static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+const mongoose = require('mongoose');
+
+// Auto-reconnect middleware if Mongoose connection was dropped or started before Atlas IP whitelist
+app.use(async (req, res, next) => {
+  if (mongoose.connection.readyState === 0 && process.env.MONGO_URI) {
+    try {
+      await mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000 });
+    } catch (e) {
+      // Handled in specific routes
+    }
+  }
+  next();
+});
+
 // Health Check Endpoint
-app.get('/api/health', (req, res) => {
-  const mongoose = require('mongoose');
+app.get('/api/health', async (req, res) => {
+  if (mongoose.connection.readyState === 0 && process.env.MONGO_URI) {
+    try {
+      await mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000 });
+    } catch (e) {}
+  }
   const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
   res.status(200).json({
     success: true,
     message: 'CampusConnect API Gateway is running smoothly',
     database: dbStatus,
+    mongoUriConfigured: !!process.env.MONGO_URI,
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
   });

@@ -10,22 +10,18 @@ if (process.platform === 'win32') {
   }
 }
 
+const DEFAULT_MONGO_URI = 'mongodb+srv://harshvardhan:Harsh%40123@cluster0.1ummtqf.mongodb.net/campusconnect?retryWrites=true&w=majority';
+
 /**
  * MongoDB Atlas Connection Utility
  */
 const connectDB = async () => {
-  const uri = process.env.MONGO_URI;
-
-  if (!uri) {
-    console.error('❌ MONGO_URI is missing from environment variables!');
-    console.error('👉 Please add MONGO_URI in your Render Dashboard > Environment.');
-    return null;
-  }
+  const uri = process.env.MONGO_URI || DEFAULT_MONGO_URI;
 
   try {
     const conn = await mongoose.connect(uri, {
       autoIndex: true,
-      serverSelectionTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 15000,
     });
 
     console.log(`✅ MongoDB Atlas Connected: ${conn.connection.host}`);

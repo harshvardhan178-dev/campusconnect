@@ -49,12 +49,14 @@ if (process.env.NODE_ENV === 'development') {
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const mongoose = require('mongoose');
+const DEFAULT_MONGO_URI = 'mongodb+srv://harshvardhan:Harsh%40123@cluster0.1ummtqf.mongodb.net/campusconnect?retryWrites=true&w=majority';
 
 // Auto-reconnect middleware if Mongoose connection was dropped or started before Atlas IP whitelist
 app.use(async (req, res, next) => {
-  if (mongoose.connection.readyState === 0 && process.env.MONGO_URI) {
+  if (mongoose.connection.readyState === 0) {
     try {
-      await mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000 });
+      const uri = process.env.MONGO_URI || DEFAULT_MONGO_URI;
+      await mongoose.connect(uri, { serverSelectionTimeoutMS: 10000 });
     } catch (e) {
       // Handled in specific routes
     }
@@ -64,9 +66,10 @@ app.use(async (req, res, next) => {
 
 // Health Check Endpoint
 app.get('/api/health', async (req, res) => {
-  if (mongoose.connection.readyState === 0 && process.env.MONGO_URI) {
+  if (mongoose.connection.readyState === 0) {
     try {
-      await mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000 });
+      const uri = process.env.MONGO_URI || DEFAULT_MONGO_URI;
+      await mongoose.connect(uri, { serverSelectionTimeoutMS: 10000 });
     } catch (e) {}
   }
   const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
@@ -74,7 +77,6 @@ app.get('/api/health', async (req, res) => {
     success: true,
     message: 'CampusConnect API Gateway is running smoothly',
     database: dbStatus,
-    mongoUriConfigured: !!process.env.MONGO_URI,
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
   });

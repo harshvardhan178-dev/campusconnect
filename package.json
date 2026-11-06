@@ -1,0 +1,27 @@
+{
+  "name": "campusconnect-monorepo",
+  "version": "1.0.0",
+  "description": "CampusConnect - Student Opportunity & Team Finder MERN Application",
+  "private": true,
+  "scripts": {
+    "server": "npm run dev --prefix server",
+    "client": "npm run dev --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "install-all": "npm install && npm install --prefix server && npm install --prefix client",
+    "build": "npm run build --prefix client"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "mern",
+    "react",
+    "nodejs",
+    "mongodb",
+    "express",
+    "hackathons",
+    "team-finder"
+  ],
+  "author": "CampusConnect Team",
+  "license": "ISC"
+}
